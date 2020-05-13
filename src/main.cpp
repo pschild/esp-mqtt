@@ -17,7 +17,7 @@
 #endif
 
 const char* MQTT_BROKER = "192.168.178.28";
-char* vvv;
+char* version;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -50,7 +50,7 @@ void checkForUpdate(bool forceUpdate) {
   ) {
     WiFiClient client;
     ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
-    ESPhttpUpdate.update(client, "http://192.168.178.28:9042/ota", vvv);
+    ESPhttpUpdate.update(client, "http://192.168.178.28:9042/ota", version);
     lastUpdateCheck = now;
   }
 }
@@ -58,7 +58,7 @@ void checkForUpdate(bool forceUpdate) {
 void reconnectMqttClient() {
   while (!client.connected()) {
     Serial.print("Reconnecting...");
-    if (!client.connect("ESP8266Client")) {
+    if (!client.connect("NodeMcuClient")) {
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" retrying in 5 seconds");
@@ -85,7 +85,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void setup() {
   if (VERSION == "") {
-    vvv = "unknown";
+    version = "unknown";
   }
 
   Serial.begin(9600);
@@ -103,6 +103,6 @@ void loop() {
   }
   client.loop();
 
-  client.publish("/home/data", vvv);
+  client.publish("/devices/NodeMcuClient/version", version);
   delay(5000);
 }
