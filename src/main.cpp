@@ -68,7 +68,13 @@ void sendPing() {
 void reconnectMqttClient() {
   while (!mqttClient.connected()) {
     Serial.print("Reconnecting...");
-    if (!mqttClient.connect("NodemcuClient")) {
+
+    char clientName[20];
+    strcpy(clientName, "ESP_");
+    strcat(clientName, String(ESP.getChipId()).c_str());
+    puts(clientName);
+
+    if (!mqttClient.connect(clientName)) {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
       Serial.println(" retrying in 5 seconds");
