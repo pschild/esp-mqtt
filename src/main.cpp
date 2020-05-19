@@ -99,8 +99,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println(msg);
   if (strcmp(msg, "on") == 0) {
     digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(4, LOW);
   } else if (strcmp(msg, "off") == 0) {
     digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(4, HIGH);
   }
 }
 
@@ -111,6 +113,7 @@ void setup() {
   mqttClient.setServer(MQTT_BROKER, 1883);
   mqttClient.setCallback(callback);
 
+  pinMode(4, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 }
