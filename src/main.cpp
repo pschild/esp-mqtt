@@ -99,10 +99,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println(msg);
   if (strcmp(msg, "on") == 0) {
     digitalWrite(LED_BUILTIN, LOW);
-    digitalWrite(4, LOW);
+    digitalWrite(4, HIGH);
   } else if (strcmp(msg, "off") == 0) {
     digitalWrite(LED_BUILTIN, HIGH);
-    digitalWrite(4, HIGH);
+    digitalWrite(4, LOW);
   }
 }
 
