@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <Ticker.h>
+#include <WifiHandler.h>
 #include <MqttHandler.h>
 #include <OTAUpdateHandler.h>
 
@@ -16,44 +17,35 @@
   #error "Missing VERSION"
 #endif
 
+const String CHIP_ID = String("ESP_") + String(ESP.getChipId());
+
 void ping();
 void onFooBar(char* payload);
+void onOtaUpdate(char* payload);
 void onMqttConnected();
 
-MqttHandler mqttHandler("192.168.178.28", String("ESP_") + String(ESP.getChipId()));
+WifiHandler wifiHandler(WIFI_SSID, WIFI_PASSWORD);
+MqttHandler mqttHandler("192.168.178.28", CHIP_ID);
 OTAUpdateHandler updateHandler("192.168.178.28:9042", VERSION);
 Ticker pingTimer(ping, 60 * 1000);
-
-void connectToWifi() {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-  unsigned long wifiConnectStart = millis();
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    if (millis() - wifiConnectStart > 5000) {
-      return;
-    }
-  }
-}
 
 void setup() {
   Serial.begin(9600);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 
-  connectToWifi();
-
+  wifiHandler.connect();
   mqttHandler.setOnConnectedCallback(onMqttConnected);
   mqttHandler.setup();
-
   pingTimer.start();
+
+  // start OTA update immediately
+  updateHandler.startUpdate();
 }
 
 void loop() {
   mqttHandler.loop();
   updateHandler.loop();
-
   pingTimer.update();
 }
 
@@ -69,6 +61,11 @@ void onFooBar(char* payload) {
   }
 }
 
+void onOtaUpdate(char* payload) {
+  updateHandler.startUpdate();
+}
+
 void onMqttConnected() {
   mqttHandler.subscribe("/foo/bar", onFooBar);
+  mqttHandler.subscribe("/otaUpdate/all", onOtaUpdate);
 }
